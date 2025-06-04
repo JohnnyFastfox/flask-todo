@@ -37,6 +37,23 @@ def add_todo():
     db.session.commit()
     return jsonify({"id": todo.id, "title": todo.title, "done": todo.done}), 201
 
+# Neuer PUT-Endpunkt, um den Status von todo.done zu ändern
+@app.route("/todos/<int:todo_id>", methods=["PUT"])
+def update_todo_status(todo_id):
+    data = request.get_json()
+    if not data or "done" not in data:
+        return jsonify({"error": "Bad Request, 'done' (Boolean) erforderlich"}), 400
+
+    # Todo-Item suchen
+    todo = Todo.query.get(todo_id)
+    if not todo:
+        return jsonify({"error": "Todo nicht gefunden"}), 404
+
+    # Boolean-Wert updaten und speichern
+    todo.done = bool(data["done"])
+    db.session.commit()
+    return jsonify({"id": todo.id, "title": todo.title, "done": todo.done}), 200
+
 if __name__ == "__main__":
     # Stelle sicher, dass die Tabellen erstellt werden
     with app.app_context():
