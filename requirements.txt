@@ -2,3 +2,6 @@ Flask
 Flask_SQLAlchemy
 psycopg2-binary
 pytest
+black
+flake8
+mypy

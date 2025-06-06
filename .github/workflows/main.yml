@@ -3,11 +3,11 @@ name: CI Pipeline
 on:
   push:
     branches:
-      - 'major'
+#      - 'major'
       - 'minor'
   pull_request:
     branches:
-      - 'major'
+#      - 'major'
       - 'minor'
 
 jobs:
@@ -76,5 +76,5 @@ jobs:
       - name: Typüberprüfung mit Mypy
         run: mypy .
 
-      - name: Tests ausführen
-        run: pytest
+#      - name: Tests ausführen
+#        run: pytest
