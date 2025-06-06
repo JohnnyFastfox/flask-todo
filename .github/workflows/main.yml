@@ -89,7 +89,7 @@ jobs:
           docker build -t flask-todo:latest .
 
       - name: Trivy-Sicherheitsscan des Docker-Images
-        uses: aquasecurity/trivy-action@v0.9.2
+        uses: aquasecurity/trivy-action@v0.31.0
         with:
           image-ref: flask-todo:${{ github.sha }}
 
