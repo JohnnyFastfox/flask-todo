@@ -8,5 +8,8 @@ RUN pip install --no-cache-dir -r requirements.txt
 COPY . .
 
 EXPOSE 5000
+
 ENV PYTHONUNBUFFERED=1
-CMD ["python", "flask-todo.py"]
+ENV PYTHONPATH=/app
+
+ENTRYPOINT ["/app/entrypoint.sh"]

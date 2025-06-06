@@ -5,10 +5,11 @@ import os
 app = Flask(__name__)
 
 # Konfiguration aus Umgebungsvariablen
-app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv('DATABASE_URL')
-app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+app.config["SQLALCHEMY_DATABASE_URI"] = os.getenv("DATABASE_URL")
+app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 
 db = SQLAlchemy(app)
+
 
 # Datenbankmodell
 class Todo(db.Model):
@@ -16,14 +17,15 @@ class Todo(db.Model):
     title = db.Column(db.String(120), nullable=False)
     done = db.Column(db.Boolean, default=False)
 
+
 # Route zum Abrufen aller ToDos
 @app.route("/todos", methods=["GET"])
 def list_todos():
     todos = Todo.query.all()
-    return jsonify([
-        {"id": todo.id, "title": todo.title, "done": todo.done}
-        for todo in todos
-    ])
+    return jsonify(
+        [{"id": todo.id, "title": todo.title, "done": todo.done} for todo in todos]
+    )
+
 
 # Route zum Hinzufügen eines neuen ToDos
 @app.route("/todos", methods=["POST"])
@@ -36,6 +38,7 @@ def add_todo():
     db.session.add(todo)
     db.session.commit()
     return jsonify({"id": todo.id, "title": todo.title, "done": todo.done}), 201
+
 
 # Neuer PUT-Endpunkt, um den Status von todo.done zu ändern
 @app.route("/todos/<int:todo_id>", methods=["PUT"])
@@ -53,6 +56,19 @@ def update_todo_status(todo_id):
     todo.done = bool(data["done"])
     db.session.commit()
     return jsonify({"id": todo.id, "title": todo.title, "done": todo.done}), 200
+
+
+# Route zum Löschen eines ToDos
+@app.route("/todos/<int:todo_id>", methods=["DELETE"])
+def delete_todo(todo_id):
+    todo = Todo.query.get(todo_id)
+    if not todo:
+        return jsonify({"error": "Todo nicht gefunden"}), 404
+
+    db.session.delete(todo)
+    db.session.commit()
+    return jsonify({"message": f"Todo mit ID {todo_id} wurde gelöscht."}), 200
+
 
 if __name__ == "__main__":
     # Stelle sicher, dass die Tabellen erstellt werden

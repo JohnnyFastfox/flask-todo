@@ -4,13 +4,13 @@
 apiVersion: v1
 kind: Secret
 metadata:
-  name: app-secrets
+  name: flask-todo-secrets
 type: Opaque
 stringData:
   # Passwort für Postgres (unbedingt nach dem Apply anpassen!)
-  postgres-password: password123
+  postgres-password: securepassword
   # DATABASE_URL für Flask (gleiche Credentials)
-  database_url: postgresql://appuser:password123@postgres-headless:5432/todos_db
+  database_url: postgresql://todo_user:securepassword@postgres-headless:5432/todo_db
 ---
 # -------------------------------------------------------
 # Headless Service für Postgres (StatefulSet)
@@ -58,14 +58,14 @@ spec:
               containerPort: 5432
           env:
             - name: POSTGRES_USER
-              value: "appuser"
+              value: "todo_user"
             - name: POSTGRES_PASSWORD
               valueFrom:
                 secretKeyRef:
-                  name: app-secrets
+                  name: flask-todo-secrets
                   key: postgres-password
             - name: POSTGRES_DB
-              value: "todos_db"
+              value: "todo_db"
           volumeMounts:
             - name: postgres-storage
               mountPath: /var/lib/postgresql/data
@@ -87,44 +87,66 @@ spec:
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: flask-example-deployment
+  name: flask-todo-deployment
   labels:
-    app: flask-example
+    app: flask-todo
 spec:
   replicas: 2
   selector:
     matchLabels:
-      app: flask-example
+      app: flask-todo
   template:
     metadata:
       labels:
-        app: flask-example
+        app: flask-todo
     spec:
       containers:
-        - name: flask-example
-          image: flask-example:1.0
+        - name: flask-todo
+          image: flask-todo:1.1.0
           ports:
             - containerPort: 5000
           env:
             - name: DATABASE_URL
               valueFrom:
                 secretKeyRef:
-                  name: app-secrets
+                  name: flask-todo-secrets
                   key: database_url
+          resources:
+            requests:
+              cpu: "100m"
 ---
 # -------------------------------------------------------
-# Service für die Flask-Todo-API (interner Zugriff im Cluster)
+# Service für die Flask-Todo-API
 # -------------------------------------------------------
 apiVersion: v1
 kind: Service
 metadata:
-  name: flask-service
+  name: flask-todo-service
   labels:
-    app: flask-example
+    app: flask-todo
 spec:
-  type: ClusterIP
+  type: NodePort
   selector:
-    app: flask-example
+    app: flask-todo
   ports:
     - port: 5000
       targetPort: 5000
+---
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: flask-todo-hpa
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: flask-todo-deployment
+  minReplicas: 2
+  maxReplicas: 10
+  metrics:
+  - type: Resource
+    resource:
+      name: cpu
+      target:
+        type: Utilization
+        averageUtilization: 10
