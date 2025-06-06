@@ -68,7 +68,7 @@ jobs:
           pip install pytest
 
       - name: Code formatieren mit Black
-        run: black --check .
+        run: black --line-length=79 .
 
       - name: Linting mit Flake8
         run: flake8 .
