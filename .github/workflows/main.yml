@@ -51,6 +51,7 @@ jobs:
 
   lint-minor:
     if: ${{ github.ref_name == 'minor' }}
+    name: Codebase linten
     runs-on: ubuntu-latest
     steps:
       - name: Repository auschecken

@@ -1,4 +1,4 @@
-FROM python:3.10-slim
+FROM python:python:3.13.4-slim
 WORKDIR /app
 
 # requirements.txt mit psycopg2-binary kopieren und abhängen
