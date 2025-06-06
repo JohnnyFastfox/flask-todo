@@ -1,0 +1,16 @@
+# -------------------------------------------------------
+# Service für die Flask-Todo-API
+# -------------------------------------------------------
+apiVersion: v1
+kind: Service
+metadata:
+  name: flask-todo-service
+  labels:
+    app: flask-todo
+spec:
+  type: NodePort
+  selector:
+    app: flask-todo
+  ports:
+    - port: 5000
+      targetPort: 5000

@@ -12,7 +12,7 @@ db = SQLAlchemy(app)
 
 
 # Datenbankmodell
-class Todo(db.Model):
+class Todo(db.Model):  # type: ignore[name-defined]
     id = db.Column(db.Integer, primary_key=True)
     title = db.Column(db.String(120), nullable=False)
     done = db.Column(db.Boolean, default=False)
@@ -23,7 +23,10 @@ class Todo(db.Model):
 def list_todos():
     todos = Todo.query.all()
     return jsonify(
-        [{"id": todo.id, "title": todo.title, "done": todo.done} for todo in todos]
+        [
+            {"id": todo.id, "title": todo.title, "done": todo.done}
+            for todo in todos
+        ]
     )
 
 
@@ -37,7 +40,10 @@ def add_todo():
     todo = Todo(title=data["title"])
     db.session.add(todo)
     db.session.commit()
-    return jsonify({"id": todo.id, "title": todo.title, "done": todo.done}), 201
+    return (
+        jsonify({"id": todo.id, "title": todo.title, "done": todo.done}),
+        201,
+    )
 
 
 # Neuer PUT-Endpunkt, um den Status von todo.done zu ändern
@@ -45,7 +51,10 @@ def add_todo():
 def update_todo_status(todo_id):
     data = request.get_json()
     if not data or "done" not in data:
-        return jsonify({"error": "Bad Request, 'done' (Boolean) erforderlich"}), 400
+        return (
+            jsonify({"error": "Bad Request, 'done' (Boolean) erforderlich"}),
+            400,
+        )
 
     # Todo-Item suchen
     todo = Todo.query.get(todo_id)
@@ -55,7 +64,10 @@ def update_todo_status(todo_id):
     # Boolean-Wert updaten und speichern
     todo.done = bool(data["done"])
     db.session.commit()
-    return jsonify({"id": todo.id, "title": todo.title, "done": todo.done}), 200
+    return (
+        jsonify({"id": todo.id, "title": todo.title, "done": todo.done}),
+        200,
+    )
 
 
 # Route zum Löschen eines ToDos
